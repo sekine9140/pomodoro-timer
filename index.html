@@ -222,16 +222,16 @@
       if (!isBreak) {
         sessions++;
         sessionCount.textContent = `セッション ${sessions} / 4`;
-        tomatoEls.forEach((el, i) => el.classList.toggle('done', i < sessions % 5 || (sessions % 4 === 0 && sessions > 0)));
-        notify('作業終了！休憩しましょう 🍅');
+        tomatoEls.forEach((el, i) => el.classList.toggle('done', i < sessions % 4 || (sessions % 4 === 0 && sessions > 0)));
+        notify('作業終了！休憩しましょう 🍅', false);
         init(true);
       } else {
-        notify('休憩終了！次のセッションを始めましょう');
+        notify('休憩終了！次のセッションを始めましょう', true);
         init(false);
       }
     }
 
-    function notify(msg) {
+    function notify(msg, wasBreak) {
       if (Notification.permission === 'granted') {
         new Notification('ポモドーロ', { body: msg, icon: '🍅' });
       }
@@ -240,7 +240,7 @@
         const o = beep.createOscillator();
         const g = beep.createGain();
         o.connect(g); g.connect(beep.destination);
-        o.frequency.value = isBreak ? 523 : 880;
+        o.frequency.value = wasBreak ? 523 : 880;
         g.gain.setValueAtTime(0.3, beep.currentTime + delay / 1000);
         g.gain.exponentialRampToValueAtTime(0.001, beep.currentTime + delay / 1000 + 0.3);
         o.start(beep.currentTime + delay / 1000);
