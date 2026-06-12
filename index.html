@@ -165,8 +165,10 @@
   <div class="session-count" id="session-count">セッション 0 / 4</div>
 
   <div class="settings">
-    <label>作業 (分) <input type="number" id="work-min" value="25" min="1" max="60"></label>
-    <label>休憩 (分) <input type="number" id="break-min" value="5" min="1" max="30"></label>
+    <label>作業 (分) <input type="number" id="work-min" value="25" min="0" max="99"></label>
+    <label>作業 (秒) <input type="number" id="work-sec" value="0" min="0" max="59"></label>
+    <label>休憩 (分) <input type="number" id="break-min" value="5" min="0" max="99"></label>
+    <label>休憩 (秒) <input type="number" id="break-sec" value="0" min="0" max="59"></label>
     <label>セット数 <input type="number" id="set-count" value="4" min="1" max="10"></label>
   </div>
 
@@ -183,12 +185,20 @@
     const tomatoContainer = document.getElementById('tomatoes');
     const btnToggle   = document.getElementById('btn-toggle');
     const btnReset    = document.getElementById('btn-reset');
-    const workInput   = document.getElementById('work-min');
-    const breakInput  = document.getElementById('break-min');
-    const setInput    = document.getElementById('set-count');
+    const workMinInput  = document.getElementById('work-min');
+    const workSecInput  = document.getElementById('work-sec');
+    const breakMinInput = document.getElementById('break-min');
+    const breakSecInput = document.getElementById('break-sec');
+    const setInput      = document.getElementById('set-count');
 
-    function getWorkSecs()  { return (parseInt(workInput.value)  || 25) * 60; }
-    function getBreakSecs() { return (parseInt(breakInput.value) || 5)  * 60; }
+    function getWorkSecs()  {
+      const s = (parseInt(workMinInput.value) || 0) * 60 + (parseInt(workSecInput.value) || 0);
+      return s > 0 ? s : 25 * 60;
+    }
+    function getBreakSecs() {
+      const s = (parseInt(breakMinInput.value) || 0) * 60 + (parseInt(breakSecInput.value) || 0);
+      return s > 0 ? s : 5 * 60;
+    }
     function getSetCount()  { return Math.max(1, parseInt(setInput.value) || 4); }
 
     function getTomatoEls() { return tomatoContainer.querySelectorAll('.tomato'); }
@@ -276,7 +286,7 @@
       init(false);
     });
 
-    [workInput, breakInput].forEach(inp => inp.addEventListener('change', () => {
+    [workMinInput, workSecInput, breakMinInput, breakSecInput].forEach(inp => inp.addEventListener('change', () => {
       if (!isRunning) init(isBreak);
     }));
 
