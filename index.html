@@ -232,20 +232,20 @@
     <div class="setting-group">
       <span class="setting-label">作業時間</span>
       <div class="time-adjuster">
-        <!-- 分ボタン (10分・1分) -->
+        <!-- 分ボタン: 10分列・1分列 -->
         <div class="unit-btns">
           <button data-target="work" data-delta="600">▲<br>10分</button>
           <button data-target="work" data-delta="60">▲<br>1分</button>
-          <button data-target="work" data-delta="-60">▼<br>1分</button>
           <button data-target="work" data-delta="-600">▼<br>10分</button>
+          <button data-target="work" data-delta="-60">▼<br>1分</button>
         </div>
         <div class="mmss-display" id="work-display">25:00</div>
-        <!-- 秒ボタン (10秒・1秒) -->
+        <!-- 秒ボタン: 10秒列・1秒列 -->
         <div class="unit-btns">
           <button data-target="work" data-delta="10">▲<br>10秒</button>
           <button data-target="work" data-delta="1">▲<br>1秒</button>
-          <button data-target="work" data-delta="-1">▼<br>1秒</button>
           <button data-target="work" data-delta="-10">▼<br>10秒</button>
+          <button data-target="work" data-delta="-1">▼<br>1秒</button>
         </div>
       </div>
     </div>
@@ -256,21 +256,18 @@
         <div class="unit-btns">
           <button data-target="break" data-delta="600">▲<br>10分</button>
           <button data-target="break" data-delta="60">▲<br>1分</button>
-          <button data-target="break" data-delta="-60">▼<br>1分</button>
           <button data-target="break" data-delta="-600">▼<br>10分</button>
+          <button data-target="break" data-delta="-60">▼<br>1分</button>
         </div>
         <div class="mmss-display" id="break-display">05:00</div>
         <div class="unit-btns">
           <button data-target="break" data-delta="10">▲<br>10秒</button>
           <button data-target="break" data-delta="1">▲<br>1秒</button>
-          <button data-target="break" data-delta="-1">▼<br>1秒</button>
           <button data-target="break" data-delta="-10">▼<br>10秒</button>
+          <button data-target="break" data-delta="-1">▼<br>1秒</button>
         </div>
       </div>
-    </div>
-
-    <div class="setting-group">
-      <span class="setting-label">セット数</span>
+      <span class="setting-label" style="margin-top:0.8rem">セット数</span>
       <div class="set-count-wrap">
         <button id="set-down">▼</button>
         <input type="number" id="set-count" value="4" min="1" max="10">
