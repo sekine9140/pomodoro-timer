@@ -122,13 +122,16 @@
     .tomato.done { opacity: 1; }
 
     .settings {
-      display: flex;
-      gap: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1.5rem 2.5rem;
       opacity: 0.6;
       font-size: 0.8rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
+      justify-items: center;
+    }
+    .settings .setting-group:last-child {
+      grid-column: 1 / 3;
     }
     .setting-group {
       display: flex;
