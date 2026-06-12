@@ -264,6 +264,9 @@
     btnReset.addEventListener('click', () => {
       clearInterval(timer); timer = null; isRunning = false;
       btnToggle.textContent = '開始';
+      sessions = 0;
+      sessionCount.textContent = 'セッション 0 / 4';
+      tomatoEls.forEach(el => el.classList.remove('done'));
       init(false);
     });
 
