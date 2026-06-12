@@ -160,18 +160,14 @@
     <button id="btn-toggle">開始</button>
   </div>
 
-  <div class="tomatoes" id="tomatoes">
-    <span class="tomato">🍅</span>
-    <span class="tomato">🍅</span>
-    <span class="tomato">🍅</span>
-    <span class="tomato">🍅</span>
-  </div>
+  <div class="tomatoes" id="tomatoes"></div>
 
   <div class="session-count" id="session-count">セッション 0 / 4</div>
 
   <div class="settings">
     <label>作業 (分) <input type="number" id="work-min" value="25" min="1" max="60"></label>
     <label>休憩 (分) <input type="number" id="break-min" value="5" min="1" max="30"></label>
+    <label>セット数 <input type="number" id="set-count" value="4" min="1" max="10"></label>
   </div>
 
   <script>
@@ -184,14 +180,23 @@
     const timeDisplay = document.getElementById('time-display');
     const phaseLabel  = document.getElementById('phase-label');
     const sessionCount = document.getElementById('session-count');
-    const tomatoEls   = document.querySelectorAll('.tomato');
+    const tomatoContainer = document.getElementById('tomatoes');
     const btnToggle   = document.getElementById('btn-toggle');
     const btnReset    = document.getElementById('btn-reset');
     const workInput   = document.getElementById('work-min');
     const breakInput  = document.getElementById('break-min');
+    const setInput    = document.getElementById('set-count');
 
     function getWorkSecs()  { return (parseInt(workInput.value)  || 25) * 60; }
     function getBreakSecs() { return (parseInt(breakInput.value) || 5)  * 60; }
+    function getSetCount()  { return Math.max(1, parseInt(setInput.value) || 4); }
+
+    function getTomatoEls() { return tomatoContainer.querySelectorAll('.tomato'); }
+
+    function rebuildTomatoes() {
+      const n = getSetCount();
+      tomatoContainer.innerHTML = Array.from({length: n}, () => '<span class="tomato">🍅</span>').join('');
+    }
 
     function init(breakPhase = false) {
       isBreak = breakPhase;
@@ -220,9 +225,10 @@
       clearInterval(timer); timer = null; isRunning = false;
       btnToggle.textContent = '開始';
       if (!isBreak) {
+        const n = getSetCount();
         sessions++;
-        sessionCount.textContent = `セッション ${sessions} / 4`;
-        tomatoEls.forEach((el, i) => el.classList.toggle('done', i < sessions % 4 || (sessions % 4 === 0 && sessions > 0)));
+        sessionCount.textContent = `セッション ${sessions} / ${n}`;
+        getTomatoEls().forEach((el, i) => el.classList.toggle('done', i < sessions % n || (sessions % n === 0 && sessions > 0)));
         notify('作業終了！休憩しましょう 🍅', false);
         init(true);
       } else {
@@ -265,8 +271,8 @@
       clearInterval(timer); timer = null; isRunning = false;
       btnToggle.textContent = '開始';
       sessions = 0;
-      sessionCount.textContent = 'セッション 0 / 4';
-      tomatoEls.forEach(el => el.classList.remove('done'));
+      sessionCount.textContent = `セッション 0 / ${getSetCount()}`;
+      getTomatoEls().forEach(el => el.classList.remove('done'));
       init(false);
     });
 
@@ -274,6 +280,15 @@
       if (!isRunning) init(isBreak);
     }));
 
+    setInput.addEventListener('change', () => {
+      if (!isRunning) {
+        sessions = 0;
+        rebuildTomatoes();
+        sessionCount.textContent = `セッション 0 / ${getSetCount()}`;
+      }
+    });
+
+    rebuildTomatoes();
     init();
   </script>
 </body>
