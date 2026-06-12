@@ -123,45 +123,86 @@
 
     .settings {
       display: flex;
-      gap: 2rem;
-      opacity: 0.55;
+      gap: 2.5rem;
+      opacity: 0.6;
       font-size: 0.8rem;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: flex-start;
     }
-    .setting-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-    .setting-group span { letter-spacing: 0.1em; }
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .setting-label {
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+    }
+
+    /* time adjuster: [min-btns] [mm:ss display] [sec-btns] */
+    .time-adjuster {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
     .mmss-display {
-      font-size: 1.3rem;
+      font-size: 2rem;
+      font-weight: 300;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.05em;
-      padding: 0.2rem 0.6rem;
+      letter-spacing: 0.06em;
+      padding: 0.4rem 0.8rem;
       background: #ffffff10;
       border: 1px solid #ffffff20;
-      border-radius: 6px;
+      border-radius: 8px;
+      min-width: 5.2rem;
+      text-align: center;
     }
-    .adj-btns { display: flex; gap: 0.3rem; }
-    .adj-btns button {
+    /* 2×2 grid of up/down buttons for each unit */
+    .unit-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.25rem;
+    }
+    .unit-btns button {
       background: #ffffff12;
       color: #eee;
       border-radius: 6px;
-      padding: 0.25rem 0.45rem;
-      font-size: 0.72rem;
+      padding: 0.3rem 0;
+      font-size: 0.68rem;
       min-width: unset;
+      width: 2.8rem;
+      line-height: 1.2;
     }
-    .adj-btns button:hover { background: #ffffff22; }
-    .set-count-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .unit-btns button:hover { background: #ffffff22; }
+
+    /* set count */
+    .set-count-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
     .set-count-wrap input[type=number] {
-      width: 46px;
+      width: 48px;
       text-align: center;
       background: #ffffff10;
       border: 1px solid #ffffff20;
       border-radius: 6px;
       color: #eee;
-      padding: 0.3rem 0.4rem;
-      font-size: 0.9rem;
+      padding: 0.35rem 0.4rem;
+      font-size: 1rem;
     }
     .set-count-wrap input[type=number]:focus { outline: none; border-color: #e94560; }
+    .set-count-wrap button {
+      background: #ffffff12;
+      color: #eee;
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      font-size: 1rem;
+      min-width: unset;
+    }
+    .set-count-wrap button:hover { background: #ffffff22; }
   </style>
 </head>
 <body>
@@ -189,37 +230,51 @@
 
   <div class="settings">
     <div class="setting-group">
-      <span>作業時間</span>
-      <div class="mmss-display" id="work-display">25:00</div>
-      <div class="adj-btns">
-        <button data-target="work" data-delta="-600">-10分</button>
-        <button data-target="work" data-delta="-60">-1分</button>
-        <button data-target="work" data-delta="-10">-10秒</button>
-        <button data-target="work" data-delta="-1">-1秒</button>
-        <button data-target="work" data-delta="1">+1秒</button>
-        <button data-target="work" data-delta="10">+10秒</button>
-        <button data-target="work" data-delta="60">+1分</button>
-        <button data-target="work" data-delta="600">+10分</button>
+      <span class="setting-label">作業時間</span>
+      <div class="time-adjuster">
+        <!-- 分ボタン (10分・1分) -->
+        <div class="unit-btns">
+          <button data-target="work" data-delta="600">▲<br>10分</button>
+          <button data-target="work" data-delta="60">▲<br>1分</button>
+          <button data-target="work" data-delta="-60">▼<br>1分</button>
+          <button data-target="work" data-delta="-600">▼<br>10分</button>
+        </div>
+        <div class="mmss-display" id="work-display">25:00</div>
+        <!-- 秒ボタン (10秒・1秒) -->
+        <div class="unit-btns">
+          <button data-target="work" data-delta="10">▲<br>10秒</button>
+          <button data-target="work" data-delta="1">▲<br>1秒</button>
+          <button data-target="work" data-delta="-1">▼<br>1秒</button>
+          <button data-target="work" data-delta="-10">▼<br>10秒</button>
+        </div>
       </div>
     </div>
+
     <div class="setting-group">
-      <span>休憩時間</span>
-      <div class="mmss-display" id="break-display">05:00</div>
-      <div class="adj-btns">
-        <button data-target="break" data-delta="-600">-10分</button>
-        <button data-target="break" data-delta="-60">-1分</button>
-        <button data-target="break" data-delta="-10">-10秒</button>
-        <button data-target="break" data-delta="-1">-1秒</button>
-        <button data-target="break" data-delta="1">+1秒</button>
-        <button data-target="break" data-delta="10">+10秒</button>
-        <button data-target="break" data-delta="60">+1分</button>
-        <button data-target="break" data-delta="600">+10分</button>
+      <span class="setting-label">休憩時間</span>
+      <div class="time-adjuster">
+        <div class="unit-btns">
+          <button data-target="break" data-delta="600">▲<br>10分</button>
+          <button data-target="break" data-delta="60">▲<br>1分</button>
+          <button data-target="break" data-delta="-60">▼<br>1分</button>
+          <button data-target="break" data-delta="-600">▼<br>10分</button>
+        </div>
+        <div class="mmss-display" id="break-display">05:00</div>
+        <div class="unit-btns">
+          <button data-target="break" data-delta="10">▲<br>10秒</button>
+          <button data-target="break" data-delta="1">▲<br>1秒</button>
+          <button data-target="break" data-delta="-1">▼<br>1秒</button>
+          <button data-target="break" data-delta="-10">▼<br>10秒</button>
+        </div>
       </div>
     </div>
+
     <div class="setting-group">
-      <span>セット数</span>
+      <span class="setting-label">セット数</span>
       <div class="set-count-wrap">
+        <button id="set-down">▼</button>
         <input type="number" id="set-count" value="4" min="1" max="10">
+        <button id="set-up">▲</button>
       </div>
     </div>
   </div>
@@ -354,6 +409,16 @@
         sessionCount.textContent = `セッション 0 / ${getSetCount()}`;
       }
     });
+
+    function updateSetCount(delta) {
+      if (isRunning) return;
+      setInput.value = Math.min(10, Math.max(1, getSetCount() + delta));
+      sessions = 0;
+      rebuildTomatoes();
+      sessionCount.textContent = `セッション 0 / ${getSetCount()}`;
+    }
+    document.getElementById('set-up').addEventListener('click', () => updateSetCount(1));
+    document.getElementById('set-down').addEventListener('click', () => updateSetCount(-1));
 
     rebuildTomatoes();
     init();
