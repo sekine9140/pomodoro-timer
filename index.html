@@ -141,41 +141,43 @@
       opacity: 0.7;
     }
 
-    /* time adjuster: [min-btns] [mm:ss display] [sec-btns] */
+    /* time adjuster: 5-column grid (m10, m1, colon, s10, s1) × 3 rows (▲, digit, ▼) */
     .time-adjuster {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(2, 1.8rem) 0.8rem repeat(2, 1.8rem);
+      grid-template-rows: auto auto auto;
       align-items: center;
-      gap: 0.5rem;
+      justify-items: center;
+      row-gap: 0.15rem;
     }
-    .mmss-display {
+    .ta-digit {
       font-size: 2rem;
       font-weight: 300;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.06em;
-      padding: 0.4rem 0.8rem;
-      background: #ffffff10;
-      border: 1px solid #ffffff20;
-      border-radius: 8px;
-      min-width: 5.2rem;
+      line-height: 1;
+      width: 1.8rem;
       text-align: center;
     }
-    /* 2×2 grid of up/down buttons for each unit */
-    .unit-btns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.25rem;
+    .ta-colon {
+      font-size: 2rem;
+      font-weight: 300;
+      line-height: 1;
+      text-align: center;
+      align-self: center;
     }
-    .unit-btns button {
+    .ta-colon-spacer { /* empty cell for colon column in btn rows */ }
+    .time-adjuster button {
       background: #ffffff12;
       color: #eee;
-      border-radius: 6px;
-      padding: 0.3rem 0;
-      font-size: 0.68rem;
+      border-radius: 4px;
+      padding: 0.15rem 0;
+      font-size: 0.7rem;
       min-width: unset;
-      width: 2.8rem;
-      line-height: 1.2;
+      width: 1.6rem;
+      height: 1.4rem;
+      line-height: 1;
     }
-    .unit-btns button:hover { background: #ffffff22; }
+    .time-adjuster button:hover { background: #ffffff28; }
 
     /* set count */
     .set-count-wrap {
@@ -232,40 +234,45 @@
     <div class="setting-group">
       <span class="setting-label">作業時間</span>
       <div class="time-adjuster">
-        <!-- 分ボタン: 10分列・1分列 -->
-        <div class="unit-btns">
-          <button data-target="work" data-delta="600">▲<br>10分</button>
-          <button data-target="work" data-delta="60">▲<br>1分</button>
-          <button data-target="work" data-delta="-600">▼<br>10分</button>
-          <button data-target="work" data-delta="-60">▼<br>1分</button>
-        </div>
-        <div class="mmss-display" id="work-display">25:00</div>
-        <!-- 秒ボタン: 10秒列・1秒列 -->
-        <div class="unit-btns">
-          <button data-target="work" data-delta="10">▲<br>10秒</button>
-          <button data-target="work" data-delta="1">▲<br>1秒</button>
-          <button data-target="work" data-delta="-10">▼<br>10秒</button>
-          <button data-target="work" data-delta="-1">▼<br>1秒</button>
-        </div>
+        <!-- row 1: up buttons -->
+        <button data-target="work" data-delta="600">▲</button>
+        <button data-target="work" data-delta="60">▲</button>
+        <span class="ta-colon-spacer"></span>
+        <button data-target="work" data-delta="10">▲</button>
+        <button data-target="work" data-delta="1">▲</button>
+        <!-- row 2: digits -->
+        <span class="ta-digit" id="work-d0">2</span>
+        <span class="ta-digit" id="work-d1">5</span>
+        <span class="ta-colon">:</span>
+        <span class="ta-digit" id="work-d2">0</span>
+        <span class="ta-digit" id="work-d3">0</span>
+        <!-- row 3: down buttons -->
+        <button data-target="work" data-delta="-600">▼</button>
+        <button data-target="work" data-delta="-60">▼</button>
+        <span class="ta-colon-spacer"></span>
+        <button data-target="work" data-delta="-10">▼</button>
+        <button data-target="work" data-delta="-1">▼</button>
       </div>
     </div>
 
     <div class="setting-group">
       <span class="setting-label">休憩時間</span>
       <div class="time-adjuster">
-        <div class="unit-btns">
-          <button data-target="break" data-delta="600">▲<br>10分</button>
-          <button data-target="break" data-delta="60">▲<br>1分</button>
-          <button data-target="break" data-delta="-600">▼<br>10分</button>
-          <button data-target="break" data-delta="-60">▼<br>1分</button>
-        </div>
-        <div class="mmss-display" id="break-display">05:00</div>
-        <div class="unit-btns">
-          <button data-target="break" data-delta="10">▲<br>10秒</button>
-          <button data-target="break" data-delta="1">▲<br>1秒</button>
-          <button data-target="break" data-delta="-10">▼<br>10秒</button>
-          <button data-target="break" data-delta="-1">▼<br>1秒</button>
-        </div>
+        <button data-target="break" data-delta="600">▲</button>
+        <button data-target="break" data-delta="60">▲</button>
+        <span class="ta-colon-spacer"></span>
+        <button data-target="break" data-delta="10">▲</button>
+        <button data-target="break" data-delta="1">▲</button>
+        <span class="ta-digit" id="break-d0">0</span>
+        <span class="ta-digit" id="break-d1">5</span>
+        <span class="ta-colon">:</span>
+        <span class="ta-digit" id="break-d2">0</span>
+        <span class="ta-digit" id="break-d3">0</span>
+        <button data-target="break" data-delta="-600">▼</button>
+        <button data-target="break" data-delta="-60">▼</button>
+        <span class="ta-colon-spacer"></span>
+        <button data-target="break" data-delta="-10">▼</button>
+        <button data-target="break" data-delta="-1">▼</button>
       </div>
       <span class="setting-label" style="margin-top:0.8rem">セット数</span>
       <div class="set-count-wrap">
@@ -290,12 +297,15 @@
     const tomatoContainer = document.getElementById('tomatoes');
     const btnToggle      = document.getElementById('btn-toggle');
     const btnReset       = document.getElementById('btn-reset');
-    const workDisplay    = document.getElementById('work-display');
-    const breakDisplay   = document.getElementById('break-display');
     const setInput       = document.getElementById('set-count');
 
-    function fmtMmss(s) {
-      return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+    function setDigits(prefix, secs) {
+      const mm = Math.floor(secs / 60).toString().padStart(2, '0');
+      const ss = (secs % 60).toString().padStart(2, '0');
+      document.getElementById(`${prefix}-d0`).textContent = mm[0];
+      document.getElementById(`${prefix}-d1`).textContent = mm[1];
+      document.getElementById(`${prefix}-d2`).textContent = ss[0];
+      document.getElementById(`${prefix}-d3`).textContent = ss[1];
     }
 
     function getSetCount() { return Math.max(1, parseInt(setInput.value) || 4); }
@@ -382,20 +392,20 @@
       init(false);
     });
 
-    document.querySelectorAll('.unit-btns button').forEach(btn => {
+    document.querySelectorAll('.time-adjuster button').forEach(btn => {
       btn.addEventListener('click', () => {
         if (isRunning) return;
         const target = btn.dataset.target;
         const delta  = parseInt(btn.dataset.delta);
         if (target === 'work') {
           workSecs = Math.max(1, workSecs + delta);
-          workDisplay.textContent = fmtMmss(workSecs);
+          setDigits('work', workSecs);
         } else {
           breakSecs = Math.max(1, breakSecs + delta);
-          breakDisplay.textContent = fmtMmss(breakSecs);
+          setDigits('break', breakSecs);
         }
-        if (!isBreak && target === 'work')   init(false);
-        if (isBreak  && target === 'break')  init(true);
+        if (!isBreak && target === 'work')  init(false);
+        if (isBreak  && target === 'break') init(true);
       });
     });
 
@@ -418,6 +428,8 @@
     document.getElementById('set-down').addEventListener('click', () => updateSetCount(-1));
 
     rebuildTomatoes();
+    setDigits('work', workSecs);
+    setDigits('break', breakSecs);
     init();
   </script>
 </body>
