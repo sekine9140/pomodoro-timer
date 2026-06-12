@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポモドーロタイマー</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      transition: background 0.6s;
+    }
+
+    body.break-mode { background: #0f3460; }
+
+    h1 {
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 2rem;
+    }
+
+    .ring-wrap {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin-bottom: 2rem;
+    }
+
+    svg.ring {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg { fill: none; stroke: #ffffff15; stroke-width: 10; }
+    .ring-progress {
+      fill: none;
+      stroke: #e94560;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.6s;
+    }
+    body.break-mode .ring-progress { stroke: #0f9; }
+
+    .time-display {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time {
+      font-size: 3.5rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .phase-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      opacity: 0.5;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 50px;
+      padding: 0.65rem 1.8rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    button:active { transform: scale(0.96); }
+
+    #btn-toggle {
+      background: #e94560;
+      color: #fff;
+      font-weight: 600;
+      min-width: 100px;
+    }
+    body.break-mode #btn-toggle { background: #0f9; color: #000; }
+
+    #btn-reset {
+      background: #ffffff15;
+      color: #eee;
+    }
+    #btn-reset:hover { background: #ffffff25; }
+
+    .session-count {
+      font-size: 0.85rem;
+      opacity: 0.45;
+      letter-spacing: 0.15em;
+      margin-bottom: 2rem;
+    }
+
+    .tomatoes {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .tomato { font-size: 1.4rem; opacity: 0.25; transition: opacity 0.4s; }
+    .tomato.done { opacity: 1; }
+
+    .settings {
+      display: flex;
+      gap: 1.5rem;
+      opacity: 0.45;
+      font-size: 0.8rem;
+    }
+    .settings label { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+    .settings input[type=number] {
+      width: 52px;
+      text-align: center;
+      background: #ffffff10;
+      border: 1px solid #ffffff20;
+      border-radius: 6px;
+      color: #eee;
+      padding: 0.3rem 0.4rem;
+      font-size: 0.9rem;
+    }
+    .settings input[type=number]:focus { outline: none; border-color: #e94560; opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>Pomodoro</h1>
+
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 100 100">
+      <circle class="ring-bg" cx="50" cy="50" r="44"/>
+      <circle class="ring-progress" id="ring" cx="50" cy="50" r="44"/>
+    </svg>
+    <div class="time-display">
+      <div class="time" id="time-display">25:00</div>
+      <div class="phase-label" id="phase-label">作業中</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-reset">リセット</button>
+    <button id="btn-toggle">開始</button>
+  </div>
+
+  <div class="tomatoes" id="tomatoes">
+    <span class="tomato">🍅</span>
+    <span class="tomato">🍅</span>
+    <span class="tomato">🍅</span>
+    <span class="tomato">🍅</span>
+  </div>
+
+  <div class="session-count" id="session-count">セッション 0 / 4</div>
+
+  <div class="settings">
+    <label>作業 (分) <input type="number" id="work-min" value="25" min="1" max="60"></label>
+    <label>休憩 (分) <input type="number" id="break-min" value="5" min="1" max="30"></label>
+  </div>
+
+  <script>
+    const CIRCUMFERENCE = 2 * Math.PI * 44;
+    const ring = document.getElementById('ring');
+    ring.style.strokeDasharray = CIRCUMFERENCE;
+
+    let totalSecs, remaining, timer = null, isRunning = false, isBreak = false, sessions = 0;
+
+    const timeDisplay = document.getElementById('time-display');
+    const phaseLabel  = document.getElementById('phase-label');
+    const sessionCount = document.getElementById('session-count');
+    const tomatoEls   = document.querySelectorAll('.tomato');
+    const btnToggle   = document.getElementById('btn-toggle');
+    const btnReset    = document.getElementById('btn-reset');
+    const workInput   = document.getElementById('work-min');
+    const breakInput  = document.getElementById('break-min');
+
+    function getWorkSecs()  { return (parseInt(workInput.value)  || 25) * 60; }
+    function getBreakSecs() { return (parseInt(breakInput.value) || 5)  * 60; }
+
+    function init(breakPhase = false) {
+      isBreak = breakPhase;
+      totalSecs = isBreak ? getBreakSecs() : getWorkSecs();
+      remaining = totalSecs;
+      render();
+      document.body.classList.toggle('break-mode', isBreak);
+      phaseLabel.textContent = isBreak ? '休憩中' : '作業中';
+    }
+
+    function render() {
+      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const s = (remaining % 60).toString().padStart(2, '0');
+      timeDisplay.textContent = `${m}:${s}`;
+      const frac = totalSecs > 0 ? remaining / totalSecs : 1;
+      ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
+    }
+
+    function tick() {
+      if (remaining <= 0) { onPhaseEnd(); return; }
+      remaining--;
+      render();
+    }
+
+    function onPhaseEnd() {
+      clearInterval(timer); timer = null; isRunning = false;
+      btnToggle.textContent = '開始';
+      if (!isBreak) {
+        sessions++;
+        sessionCount.textContent = `セッション ${sessions} / 4`;
+        tomatoEls.forEach((el, i) => el.classList.toggle('done', i < sessions % 5 || (sessions % 4 === 0 && sessions > 0)));
+        notify('作業終了！休憩しましょう 🍅');
+        init(true);
+      } else {
+        notify('休憩終了！次のセッションを始めましょう');
+        init(false);
+      }
+    }
+
+    function notify(msg) {
+      if (Notification.permission === 'granted') {
+        new Notification('ポモドーロ', { body: msg, icon: '🍅' });
+      }
+      const beep = new AudioContext();
+      [0, 150, 300].forEach(delay => {
+        const o = beep.createOscillator();
+        const g = beep.createGain();
+        o.connect(g); g.connect(beep.destination);
+        o.frequency.value = isBreak ? 523 : 880;
+        g.gain.setValueAtTime(0.3, beep.currentTime + delay / 1000);
+        g.gain.exponentialRampToValueAtTime(0.001, beep.currentTime + delay / 1000 + 0.3);
+        o.start(beep.currentTime + delay / 1000);
+        o.stop(beep.currentTime + delay / 1000 + 0.3);
+      });
+    }
+
+    btnToggle.addEventListener('click', () => {
+      if (!isRunning) {
+        if (Notification.permission === 'default') Notification.requestPermission();
+        timer = setInterval(tick, 1000);
+        isRunning = true;
+        btnToggle.textContent = '一時停止';
+      } else {
+        clearInterval(timer); timer = null;
+        isRunning = false;
+        btnToggle.textContent = '再開';
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      clearInterval(timer); timer = null; isRunning = false;
+      btnToggle.textContent = '開始';
+      init(false);
+    });
+
+    [workInput, breakInput].forEach(inp => inp.addEventListener('change', () => {
+      if (!isRunning) init(isBreak);
+    }));
+
+    init();
+  </script>
+</body>
+</html>
