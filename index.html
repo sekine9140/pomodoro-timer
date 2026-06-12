@@ -123,13 +123,36 @@
 
     .settings {
       display: flex;
-      gap: 1.5rem;
-      opacity: 0.45;
+      gap: 2rem;
+      opacity: 0.55;
       font-size: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .settings label { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
-    .settings input[type=number] {
-      width: 52px;
+    .setting-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .setting-group span { letter-spacing: 0.1em; }
+    .mmss-display {
+      font-size: 1.3rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      background: #ffffff10;
+      border: 1px solid #ffffff20;
+      border-radius: 6px;
+    }
+    .adj-btns { display: flex; gap: 0.3rem; }
+    .adj-btns button {
+      background: #ffffff12;
+      color: #eee;
+      border-radius: 6px;
+      padding: 0.25rem 0.45rem;
+      font-size: 0.72rem;
+      min-width: unset;
+    }
+    .adj-btns button:hover { background: #ffffff22; }
+    .set-count-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .set-count-wrap input[type=number] {
+      width: 46px;
       text-align: center;
       background: #ffffff10;
       border: 1px solid #ffffff20;
@@ -138,7 +161,7 @@
       padding: 0.3rem 0.4rem;
       font-size: 0.9rem;
     }
-    .settings input[type=number]:focus { outline: none; border-color: #e94560; opacity: 1; }
+    .set-count-wrap input[type=number]:focus { outline: none; border-color: #e94560; }
   </style>
 </head>
 <body>
@@ -165,11 +188,40 @@
   <div class="session-count" id="session-count">セッション 0 / 4</div>
 
   <div class="settings">
-    <label>作業 (分) <input type="number" id="work-min" value="25" min="0" max="99"></label>
-    <label>作業 (秒) <input type="number" id="work-sec" value="0" min="0" max="59"></label>
-    <label>休憩 (分) <input type="number" id="break-min" value="5" min="0" max="99"></label>
-    <label>休憩 (秒) <input type="number" id="break-sec" value="0" min="0" max="59"></label>
-    <label>セット数 <input type="number" id="set-count" value="4" min="1" max="10"></label>
+    <div class="setting-group">
+      <span>作業時間</span>
+      <div class="mmss-display" id="work-display">25:00</div>
+      <div class="adj-btns">
+        <button data-target="work" data-delta="-600">-10分</button>
+        <button data-target="work" data-delta="-60">-1分</button>
+        <button data-target="work" data-delta="-10">-10秒</button>
+        <button data-target="work" data-delta="-1">-1秒</button>
+        <button data-target="work" data-delta="1">+1秒</button>
+        <button data-target="work" data-delta="10">+10秒</button>
+        <button data-target="work" data-delta="60">+1分</button>
+        <button data-target="work" data-delta="600">+10分</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <span>休憩時間</span>
+      <div class="mmss-display" id="break-display">05:00</div>
+      <div class="adj-btns">
+        <button data-target="break" data-delta="-600">-10分</button>
+        <button data-target="break" data-delta="-60">-1分</button>
+        <button data-target="break" data-delta="-10">-10秒</button>
+        <button data-target="break" data-delta="-1">-1秒</button>
+        <button data-target="break" data-delta="1">+1秒</button>
+        <button data-target="break" data-delta="10">+10秒</button>
+        <button data-target="break" data-delta="60">+1分</button>
+        <button data-target="break" data-delta="600">+10分</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <span>セット数</span>
+      <div class="set-count-wrap">
+        <input type="number" id="set-count" value="4" min="1" max="10">
+      </div>
+    </div>
   </div>
 
   <script>
@@ -178,29 +230,23 @@
     ring.style.strokeDasharray = CIRCUMFERENCE;
 
     let totalSecs, remaining, timer = null, isRunning = false, isBreak = false, sessions = 0;
+    let workSecs = 25 * 60, breakSecs = 5 * 60;
 
-    const timeDisplay = document.getElementById('time-display');
-    const phaseLabel  = document.getElementById('phase-label');
-    const sessionCount = document.getElementById('session-count');
+    const timeDisplay    = document.getElementById('time-display');
+    const phaseLabel     = document.getElementById('phase-label');
+    const sessionCount   = document.getElementById('session-count');
     const tomatoContainer = document.getElementById('tomatoes');
-    const btnToggle   = document.getElementById('btn-toggle');
-    const btnReset    = document.getElementById('btn-reset');
-    const workMinInput  = document.getElementById('work-min');
-    const workSecInput  = document.getElementById('work-sec');
-    const breakMinInput = document.getElementById('break-min');
-    const breakSecInput = document.getElementById('break-sec');
-    const setInput      = document.getElementById('set-count');
+    const btnToggle      = document.getElementById('btn-toggle');
+    const btnReset       = document.getElementById('btn-reset');
+    const workDisplay    = document.getElementById('work-display');
+    const breakDisplay   = document.getElementById('break-display');
+    const setInput       = document.getElementById('set-count');
 
-    function getWorkSecs()  {
-      const s = (parseInt(workMinInput.value) || 0) * 60 + (parseInt(workSecInput.value) || 0);
-      return s > 0 ? s : 25 * 60;
+    function fmtMmss(s) {
+      return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
     }
-    function getBreakSecs() {
-      const s = (parseInt(breakMinInput.value) || 0) * 60 + (parseInt(breakSecInput.value) || 0);
-      return s > 0 ? s : 5 * 60;
-    }
-    function getSetCount()  { return Math.max(1, parseInt(setInput.value) || 4); }
 
+    function getSetCount() { return Math.max(1, parseInt(setInput.value) || 4); }
     function getTomatoEls() { return tomatoContainer.querySelectorAll('.tomato'); }
 
     function rebuildTomatoes() {
@@ -210,7 +256,7 @@
 
     function init(breakPhase = false) {
       isBreak = breakPhase;
-      totalSecs = isBreak ? getBreakSecs() : getWorkSecs();
+      totalSecs = isBreak ? breakSecs : workSecs;
       remaining = totalSecs;
       render();
       document.body.classList.toggle('break-mode', isBreak);
@@ -218,9 +264,7 @@
     }
 
     function render() {
-      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
-      const s = (remaining % 60).toString().padStart(2, '0');
-      timeDisplay.textContent = `${m}:${s}`;
+      timeDisplay.textContent = fmtMmss(remaining);
       const frac = totalSecs > 0 ? remaining / totalSecs : 1;
       ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
     }
@@ -286,9 +330,22 @@
       init(false);
     });
 
-    [workMinInput, workSecInput, breakMinInput, breakSecInput].forEach(inp => inp.addEventListener('change', () => {
-      if (!isRunning) init(isBreak);
-    }));
+    document.querySelectorAll('.adj-btns button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isRunning) return;
+        const target = btn.dataset.target;
+        const delta  = parseInt(btn.dataset.delta);
+        if (target === 'work') {
+          workSecs = Math.max(1, workSecs + delta);
+          workDisplay.textContent = fmtMmss(workSecs);
+        } else {
+          breakSecs = Math.max(1, breakSecs + delta);
+          breakDisplay.textContent = fmtMmss(breakSecs);
+        }
+        if (!isBreak && target === 'work')   init(false);
+        if (isBreak  && target === 'break')  init(true);
+      });
+    });
 
     setInput.addEventListener('change', () => {
       if (!isRunning) {
