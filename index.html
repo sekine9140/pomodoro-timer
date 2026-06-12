@@ -332,7 +332,9 @@
     }
 
     function render() {
-      timeDisplay.textContent = fmtMmss(remaining);
+      const mm = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const ss = (remaining % 60).toString().padStart(2, '0');
+      timeDisplay.textContent = `${mm}:${ss}`;
       const frac = totalSecs > 0 ? remaining / totalSecs : 1;
       ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
     }
@@ -398,7 +400,7 @@
       init(false);
     });
 
-    document.querySelectorAll('.time-adjuster button').forEach(btn => {
+    document.querySelectorAll('.time-adjuster button[data-target]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (isRunning) return;
         const target = btn.dataset.target;
