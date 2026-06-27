@@ -3,11 +3,11 @@ import PackageDescription
 
 let package = Package(
     name: "MailApp",
-    platforms: [.iOS("16.0")],
+    platforms: [.iOS("17.0")],
+    products: [
+        .library(name: "MailApp", targets: ["MailApp"])
+    ],
     targets: [
-        .executableTarget(
-            name: "MailApp",
-            path: "."
-        )
+        .target(name: "MailApp", path: ".")
     ]
 )
