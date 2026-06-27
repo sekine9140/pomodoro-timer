@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 import PackageDescription
 
 let package = Package(
@@ -8,6 +8,10 @@ let package = Package(
         .library(name: "MailApp", targets: ["MailApp"])
     ],
     targets: [
-        .target(name: "MailApp", path: ".")
+        .target(
+            name: "MailApp",
+            path: ".",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        )
     ]
 )
