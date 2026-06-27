@@ -132,7 +132,7 @@ actor IMAPClient {
     }
 
     private func escape(_ s: String) -> String {
-        s.replacingOccurrences(of: "\\\\", with: "\\\\\\\\")
+        s.replacingOccurrences(of: "\\", with: "\\\\")
          .replacingOccurrences(of: "\"", with: "\\\"")
     }
 
