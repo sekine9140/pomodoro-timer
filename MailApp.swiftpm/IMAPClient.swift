@@ -1,6 +1,10 @@
 import Foundation
 import Network
 
+private final class OnceFlag: @unchecked Sendable {
+    var fired = false
+}
+
 actor IMAPClient {
     private var connection: NWConnection?
     private let host: String
@@ -27,18 +31,18 @@ actor IMAPClient {
         )
 
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
-            var resumed = false
+            let flag = OnceFlag()
             conn.stateUpdateHandler = { state in
-                guard !resumed else { return }
+                guard !flag.fired else { return }
                 switch state {
                 case .ready:
-                    resumed = true; cont.resume()
+                    flag.fired = true; cont.resume()
                 case .failed(let e):
-                    resumed = true; cont.resume(throwing: IMAPError.networkError(e))
+                    flag.fired = true; cont.resume(throwing: IMAPError.networkError(e))
                 case .waiting(let e):
-                    resumed = true; cont.resume(throwing: IMAPError.networkError(e))
+                    flag.fired = true; cont.resume(throwing: IMAPError.networkError(e))
                 case .cancelled:
-                    resumed = true; cont.resume(throwing: IMAPError.connectionFailed("キャンセル"))
+                    flag.fired = true; cont.resume(throwing: IMAPError.connectionFailed("キャンセル"))
                 default: break
                 }
             }
