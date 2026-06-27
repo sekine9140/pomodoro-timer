@@ -22,7 +22,7 @@ struct InboxView: View {
             }
             .navigationTitle("受信トレイ")
             .searchable(text: $searchText, prompt: "件名・差出人を検索")
-            .onChange(of: searchText) { newValue in
+            .onChange(of: searchText) { _, newValue in
                 searchTask?.cancel()
                 searchTask = Task {
                     try? await Task.sleep(nanoseconds: 400_000_000)
